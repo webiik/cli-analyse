@@ -1,0 +1,24 @@
+{
+  "name": "webiik/webiik-cli",
+  "description": "Webiik CLI tools make development with Webiik easier.",
+  "homepage": "https://www.webiik.com",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Jiri Mihal",
+      "email": "jiri@mihal.me"
+    }
+  ],
+  "require": {
+    "php": ">=7.2"
+  },
+  "replace": {
+    "webiik-cli/analyse": "self.version",
+    "webiik-cli/webiik": "self.version"
+  },
+  "autoload": {
+    "psr-4": {
+      "Webiik-Cli\\": "src/Webiik-Cli"
+    }
+  }
+}
