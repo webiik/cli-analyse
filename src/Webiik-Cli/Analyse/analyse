@@ -1,9 +1,31 @@
 #!/bin/bash
 
+# Gather required parameters from user
+if [[ -z "$1" || -z "$2" ]]; then
+	echo -e "ERR: Missing required parameters"
+	echo -e "Usage: analyse source-dir output-dir"
+	exit
+fi
+SOURCE_DIR=${1%/}
+OUTPUT_DIR=${2%/}
+
+# Test directories
+if [[ ! -d ${SOURCE_DIR} ]]; then
+	echo -e "🚨ERR: source_dir doesn't exist"
+	echo -e "Usage: analyse source-dir output-dir"
+	exit
+fi
+
+if [[ ! -d ${OUTPUT_DIR} ]]; then
+	echo -e "🚨ERR: output_dir doesn't exist"
+	echo -e "Usage: analyse source-dir output-dir"
+	exit
+fi
+
 TESTS=(All PHPMD PHPCS PHPStan PHPMetrics SonarCloud Exit)
 
 run_test() {
-	PS3="What test do you want to run?: "
+	PS3="Which test do you want to run?: "
 	select TEST_TYPE in ${TESTS[@]}
 	do
 		if [[ ${TEST_TYPE} = "" ]]; then
@@ -17,75 +39,75 @@ run_test() {
 }
 
 run_phpmd() {
-	echo -e "\n🧹 PHPMD test..."
+	echo -e "\n🧹 Running PHPMD test..."
 
 	if ! hash ../vendor/bin/phpmd 2>/dev/null; then
 		echo -e "🚨ERR: phpmd not found in vendor/bin folder."
-		echo -e "INF: Install it using the composer."
+		echo -e "INF: Install it using the composer: composer require --dev phpmd/phpmd"
 		echo -e "INF: phpmd test skipped."
 		return
 	fi
 
-	if [[ ! -d "phpmd" ]]; then
-		mkdir phpmd
+	if [[ ! -d "${OUTPUT_DIR}/phpmd" ]]; then
+		mkdir ${OUTPUT_DIR}/phpmd
 	fi
 
-	../vendor/bin/phpmd ../src/Webiik html cleancode,codesize,design,naming,unusedcode --reportfile phpmd/index.html
-	echo -e "💡INF: Look in to analysis/phpmd folder to see the PHPMD test result."
+	../vendor/bin/phpmd ${SOURCE_DIR} cleancode,codesize,design,naming,unusedcode --reportfile ${OUTPUT_DIR}/phpmd/index.html
+	echo -e "💡INF: Look in to folder ${OUTPUT_DIR}/phpmd to see the PHPMD test result."
 }
 
 run_phpcs() {
-	echo -e "\n🐽 PHPCS test..."
+	echo -e "\n🐽 Running PHPCS test..."
 
 	if ! hash ../vendor/bin/phpcs 2>/dev/null; then
 		echo -e "🚨ERR: phpcs not found in vendor/bin folder."
-		echo -e "INF: Install it using the composer."
+		echo -e "INF: Install it using the composer: composer require --dev squizlabs/php_codesniffer"
 		echo -e "INF: phpcs test skipped."
 		return
 	fi
 
-	if [[ ! -d "phpcs" ]]; then
-		mkdir phpcs
+	if [[ ! -d "${OUTPUT_DIR}/phpcs" ]]; then
+		mkdir ${OUTPUT_DIR}/phpcs
 	fi
 
-	../vendor/bin/phpcs --standard=PSR2 --report-full=phpcs/report-full.txt --report-code=phpcs/report-code.txt ../src/Webiik
-	echo -e "💡INF: Look in to analysis/phpcs folder to see the PHPCS test result."
+	../vendor/bin/phpcs --standard=PSR2 --report-full=${OUTPUT_DIR}/phpcs/report-full.txt --report-code=${OUTPUT_DIR}/phpcs/report-code.txt ${SOURCE_DIR}
+	echo -e "💡INF: Look in to folder ${OUTPUT_DIR}/phpcs to see the PHPCS test result."
 }
 
 run_phpstan() {
-	echo -e "\n🔎 PHPStan test..."
+	echo -e "\n🔎 Running PHPStan test..."
 
 	if ! hash ../vendor/bin/phpstan 2>/dev/null; then
 		echo -e "🚨ERR: phpstan not found in vendor/bin folder."
-		echo -e "INF: Install it using the composer."
+		echo -e "INF: Install it using the composer: composer require --dev phpstan/phpstan"
 		echo -e "INF: phpstan test skipped."
 		return
 	fi
 
-	if [[ ! -d "phpstan" ]]; then
-		mkdir phpstan
+	if [[ ! -d "${OUTPUT_DIR}/phpstan" ]]; then
+		mkdir ${OUTPUT_DIR}/phpstan
 	fi
 
-	../vendor/bin/phpstan analyse ../src/Webiik -l 7 --no-ansi --no-progress | awk '{$1=$1;print}' > phpstan/result.txt
-	echo -e "💡INF: Look in to analysis/phpstan folder to see the PHPStan test result."
+	../vendor/bin/phpstan analyse ${SOURCE_DIR} -l 7 --no-ansi --no-progress | awk '{$1=$1;print}' > ${OUTPUT_DIR}/result.txt
+	echo -e "💡INF: Look in to folder ${OUTPUT_DIR}/phpstan to see the PHPStan test result."
 }
 
 run_phpmetrics() {
-	echo -e "\n📊 PHPmetrics test..."
+	echo -e "\n📊 Running PHPmetrics test..."
 
 	if ! hash ../vendor/bin/phpmetrics 2>/dev/null; then
 		echo -e "🚨ERR: phpmetrics not found in vendor/bin folder."
-		echo -e "INF: Install it using the composer."
+		echo -e "INF: Install it using the composer: composer require --dev phpmetrics/phpmetrics"
 		echo -e "INF: phpmetrics test skipped."
 		return
 	fi
 
-	if [[ ! -d "phpmetrics" ]]; then
-		mkdir phpmetrics
+	if [[ ! -d "${OUTPUT_DIR}/phpmetrics" ]]; then
+		mkdir ${OUTPUT_DIR}/phpmetrics
 	fi
 
-	../vendor/bin/phpmetrics --report-html=phpmetrics ../src/Webiik
-	echo -e "💡INF: Look in to analysis/phpmetrics folder to see the PHPmetrics test result."
+	../vendor/bin/phpmetrics --report-html=${OUTPUT_DIR}/phpmetrics ${SOURCE_DIR}
+	echo -e "💡INF: Look in to folder ${OUTPUT_DIR}/phpmetrics to see the PHPmetrics test result."
 }
 
 run_sonar_cloud() {
@@ -96,9 +118,9 @@ run_sonar_cloud() {
 	SONAR_LOGIN=""
 
 	# Try to load SonarCloud config from file
-	if [[ -f "sonar/conf.txt" ]]; then
+	if [[ -f "${OUTPUT_DIR}/sonar/conf.txt" ]]; then
 		SONAR_CLOUD_CONFIG=()
-		IFS=$'\n' read -d '' -r -a SONAR_CLOUD_CONFIG < sonar/conf.txt
+		IFS=$'\n' read -d '' -r -a SONAR_CLOUD_CONFIG < ${OUTPUT_DIR}/sonar/conf.txt
 		SONAR_PROJECT_KEY=${SONAR_CLOUD_CONFIG[0]}
 		SONAR_ORGANIZATION=${SONAR_CLOUD_CONFIG[1]}
 		SONAR_LOGIN=${SONAR_CLOUD_CONFIG[2]}
@@ -122,14 +144,14 @@ run_sonar_cloud() {
 			read -p "Enter sonar.login: " SONAR_LOGIN
 		done
 
-		if [[ ! -d "sonar" ]]; then
-			mkdir sonar
+		if [[ ! -d "${OUTPUT_DIR}/sonar" ]]; then
+			mkdir ${OUTPUT_DIR}/sonar
 		fi
 
-		echo ${SONAR_PROJECT_KEY} > sonar/conf.txt
-		echo ${SONAR_ORGANIZATION} >> sonar/conf.txt
-		echo ${SONAR_LOGIN} >> sonar/conf.txt
-		echo -e "💡INF: SonarCloud configuration has been stored in analysis/sonar/conf.txt"
+		echo ${SONAR_PROJECT_KEY} > ${OUTPUT_DIR}/sonar/conf.txt
+		echo ${SONAR_ORGANIZATION} >> ${OUTPUT_DIR}/sonar/conf.txt
+		echo ${SONAR_LOGIN} >> ${OUTPUT_DIR}/sonar/conf.txt
+		echo -e "💡INF: SonarCloud configuration has been stored in ${OUTPUT_DIR}/sonar/conf.txt"
 	fi
 
 	# Is sonar-scanner available? If not skip test.
@@ -144,20 +166,21 @@ run_sonar_cloud() {
 	sonar-scanner \
 	-Dsonar.projectKey=${SONAR_PROJECT_KEY} \
 	-Dsonar.organization=${SONAR_ORGANIZATION} \
-	-Dsonar.projectBaseDir=../src \
+	-Dsonar.projectBaseDir=${SOURCE_DIR} \
 	-Dsonar.sources=. \
 	-Dsonar.host.url=https://sonarcloud.io \
 	-Dsonar.login=${SONAR_LOGIN}
 
 	# To make life easier, copy test report to folder analysis/sonar
-	if [[ -f "../src/.scannerwork/report-task.txt" ]]; then
-		cp ../src/.scannerwork/report-task.txt sonar
+	if [[ -f "${SOURCE_DIR}/.scannerwork/report-task.txt" ]]; then
+		cp ${SOURCE_DIR}/.scannerwork/report-task.txt ${OUTPUT_DIR}/sonar
+		rm -r ${SOURCE_DIR}/.scannerwork
 	fi
 }
 
 run_test
 
-echo -e "\n🚀 Starting the test(s)..."
+echo -e "\n🚀 Initiating tests..."
 
 if [[ ${TEST_TYPE} = "PHPMD" ]]; then
 	run_phpmd
@@ -187,4 +210,4 @@ if [[ ${TEST_TYPE} = "All" ]]; then
 	run_sonar_cloud
 fi
 
-echo -e "\n💡INF: Results of all performed tests can be found in analysis/{test} folders."
+echo -e "\n💡INF: Results of all performed tests can be found in ${OUTPUT_DIR} folder."
