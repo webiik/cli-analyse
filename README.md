@@ -4,8 +4,8 @@ Webiik command line tools make development with Webiik easier.
  
 Available CLI Tools
 -------------------
-- [Analyse](./src/Webiik-Cli/Analyse/README.md)
-- [Webiik](./src/Webiik-Cli/Webiik/README.md)
+- [Analyse](./src/Analyse/README.md)
+- [Webiik](./src/Webiik/README.md)
 
 Resources
 ---------
