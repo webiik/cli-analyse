@@ -1,28 +1,28 @@
 <p align="left">
 <img src="https://img.shields.io/packagist/l/webiik/webiik.svg"/>
-<img src="https://img.shields.io/badge/dependencies-5-brightgreen.svg"/>
+<img src="https://img.shields.io/badge/dependencies-5-orange.svg"/>
 </p>
 
-Analysis
+Analyse
 ========
-The Analysis is a CLI tool that analyses code using PHPCS, PHPMD, PHPSTAN etc. and outputs analysis reports to specified directory. It can help you to write better code and find possible errors.
+This CLI tool analyses code using preconfigured PHPCS, PHPMD, PHPSTAN, PHPmetrics and SonarCloud. It can help you to write better code and find possible errors.
 
-> It's very likely that the Analysis will find "bugs" in your code. Always investigate these "bugs" and consider a fix. Avoid over-optimization of code, always keep on mind readability and testability.      
+> It's very likely that this tool will find "bugs" in your code. Always investigate these "bugs" and consider a fix. Avoid over-optimization of code, always keep in mind readability and testability.      
 
-Command
--------
+Usage
+-----
 ### analyse
 ```php
 analyse source-dir output-dir
 ```
 **analyse** runs code analyses over the source directory and outputs analyses results to the output directory.
 ```php
-analyse /private/app/ /private/tmp/analysis/app/
+bash analyse /private/app/ /private/tmp/analysis/app/
 ```
 
 Settings
 --------
-Analysis uses the following settings of individual test tools. In brief, it tests code for the PSR-2 standards and requires PHP strict types.
+In brief, command **analyse** tests code for the PSR-2 standards and PHP strict types. It uses the following settings:
 ```php
 phpmd [source_dir] html cleancode,codesize,design,naming,unusedcode --reportfile [output_dir]/phpmd/index.html
 ```

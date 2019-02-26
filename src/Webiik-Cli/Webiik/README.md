@@ -1,6 +1,6 @@
 <p align="left">
 <img src="https://img.shields.io/packagist/l/webiik/webiik.svg"/>
-<img src="https://img.shields.io/badge/dependencies-5-brightgreen.svg"/>
+<img src="https://img.shields.io/badge/dependencies-0-brightgreen.svg"/>
 </p>
 
 Webiik CLI
