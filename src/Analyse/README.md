@@ -4,7 +4,7 @@
 </p>
 
 Analyse
-========
+=======
 This CLI tool analyses code using preconfigured PHPCS, PHPMD, PHPSTAN, PHPmetrics and SonarCloud. It can help you to write better code and find possible errors.
 
 > It's very likely that this tool will find "bugs" in your code. Always investigate these "bugs" and consider a fix. Avoid over-optimization of code, always keep in mind readability and testability.      
